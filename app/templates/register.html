@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+<script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+<title>Create Account</title>
+
+<style>
+:root {
+  --bg: #0a0a0a;
+  --card: #111111;
+  --input: #1a1a1a;
+  --text: #ffffff;
+  --muted: #9a9a9a;
+  --border: #2a2a2a;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--card);
+  padding: 48px 36px;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
+}
+
+.title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.subtitle {
+  text-align: center;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.separator {
+  height: 1px;
+  background: #2a2a2a;
+  margin: 24px 0;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+input {
+  width: 100%;
+  padding: 14px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: var(--text);
+  outline: none;
+  transition: 0.2s ease;
+}
+
+input:focus {
+  border-color: #ffffff;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 6px;
+  border-radius: 8px;
+  border: none;
+  background: #ffffff;
+  color: #000000;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+button:hover {
+  background: #e6e6e6;
+}
+
+.footer {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.footer a {
+  color: #ffffff;
+  text-decoration: underline;
+}
+</style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="title">Create Account</div>
+    <div class="subtitle">End-to-end encrypted messaging</div>
+
+    <div class="separator"></div>
+
+    <form>
+      <div class="form-group">
+        <input type="text" id="username" placeholder="Username" required />
+      </div>
+
+      <div class="form-group">
+        <input type="password" id="password" placeholder="Password" required />
+      </div>
+
+      <!-- Hidden public key (to be filled later via PyScript) -->
+      <input type="hidden" id="public_key" name="public_key" value="" />
+
+      <button type="submit">Register</button>
+    </form>
+
+    <div class="footer">
+      Already have an account? <a href="/">Login</a>
+    </div>
+  </div>
+</body>
+</html>

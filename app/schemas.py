@@ -2,8 +2,8 @@ from pydantic import BaseModel, ConfigDict, EmailStr, model_validator, Field
 from datetime import datetime
 
 class UserCreate(BaseModel):
-    password: str = Field(..., min_length=6)
     username: str = Field(..., max_length=20)
+    password: str = Field(..., min_length=6)
     public_key: str = Field(...)
     
 class UserResponse(BaseModel):
@@ -14,8 +14,9 @@ class UserResponse(BaseModel):
     model_config  = ConfigDict(from_attributes=True)
     
 class MessageCreate(BaseModel):
-    content: str = Field(...)
     recipient_id: int = Field(...)
+    content: str = Field(...)
+    
     
 class MessageResponse(BaseModel):
     sender_id: int

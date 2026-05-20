@@ -16,6 +16,7 @@ def get_db():
         yield db
     except:
         db.rollback()
+        raise #?check
     finally:
         db.close()
         

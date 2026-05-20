@@ -1,3 +1,6 @@
 venv/
 .env
 fake.py
+__pycache__/
+*.pyc
+deletef/
