@@ -136,5 +136,45 @@ button:hover {
       Already have an account? <a href="/">Login</a>
     </div>
   </div>
+<script type="py">
+from pyscript import document, window
+from pyodide.http import pyfetch
+import asyncio
+import json
+from js import Uint8Array, Array
+import base64
+from js import Uint8Array
+
+def array_buffer_to_base64(buffer):
+    uint8 = Uint8Array.new(buffer)
+    binary = Array.from(uint8).join(",")
+    bytes_list = bytes([int(x) for x in binary.split(",")])
+    return base64.b64encode(bytes_list).decode("utf-8")
+
+async def register():
+    username_input = document.getElementById("username").value
+    password_input = document.getElementById("password").value
+
+    key_pair = await window.crypto.subtle.generateKey(
+        {"name": "RSA-OAEP", "modulusLength": 2048, 
+        "publicExponent": Uint8Array([1, 0, 1]), 
+        "hash": "SHA-256"},
+        True,
+        ["encrypt", "decrypt"]
+    )
+    public_key = await window.crypto.subtle.exportKey("spki", key_pair.publicKey) 
+    private_key = await window.crypto.subtle.exportKey("pkcs8", key_pair.privateKey)
+    public_key_str = array_buffer_to_base64(public_key)
+    private_key_str = array_buffer_to_base64(private_key)
+    response = await pyfetch("/auth/register", method="POST", body=f"username={username_input}&password={password_input}&public_key={public_key_str}", headers={"Content-Type": "application/x-www-form-urlencoded"})
+    if response.ok:
+        window.localStorage.setItem("private_key", private_key_str)
+
+async def handle_submit(event):
+    event.preventDefault()
+    await register()
+
+document.getElementById("register-form").addEventListener("submit", handle_submit)
+</script>
 </body>
 </html>
