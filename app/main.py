@@ -51,6 +51,9 @@ async def websocket_endpoint(websocket: WebSocket, db: Session = Depends(get_db)
         manager.disconnect(user.id)
         
 
+@app.get("/register")
+async def register_page(request: Request):
+    return templates.TemplateResponse(request, "register.html")
 # #?test
 # @app.get("/")
 # async def home(request : Request):

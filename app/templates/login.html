@@ -151,7 +151,7 @@ button:hover {
             data = await response.json()
             token = data.get("access_token")
             window.localStorage.setItem("token", token)
-            window.location.href = "/chat"
+            window.location.href = "/chat"        #?CHECK
         else:
             window.alert("Login failed. Please check your credentials.")
 

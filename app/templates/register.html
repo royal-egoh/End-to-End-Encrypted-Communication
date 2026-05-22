@@ -117,7 +117,7 @@ button:hover {
 
     <div class="separator"></div>
 
-    <form>
+    <form id="register-form">
       <div class="form-group">
         <input type="text" id="username" placeholder="Username" required />
       </div>
@@ -143,7 +143,6 @@ import asyncio
 import json
 from js import Uint8Array, Array
 import base64
-from js import Uint8Array
 
 def array_buffer_to_base64(buffer):
     uint8 = Uint8Array.new(buffer)
@@ -164,11 +163,19 @@ async def register():
     )
     public_key = await window.crypto.subtle.exportKey("spki", key_pair.publicKey) 
     private_key = await window.crypto.subtle.exportKey("pkcs8", key_pair.privateKey)
+
     public_key_str = array_buffer_to_base64(public_key)
     private_key_str = array_buffer_to_base64(private_key)
-    response = await pyfetch("/auth/register", method="POST", body=f"username={username_input}&password={password_input}&public_key={public_key_str}", headers={"Content-Type": "application/x-www-form-urlencoded"})
+    response = await pyfetch("/auth/register", method="POST",body=json.dumps({
+        "username": username_input,
+        "password": password_input,
+        "public_key": public_key_str
+    }),headers={"Content-Type": "application/json"})
     if response.ok:
         window.localStorage.setItem("private_key", private_key_str)
+        window.location.href = "/"
+    else:
+      window.alert("Registration failed.")
 
 async def handle_submit(event):
     event.preventDefault()
