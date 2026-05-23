@@ -54,7 +54,11 @@ async def websocket_endpoint(websocket: WebSocket, db: Session = Depends(get_db)
 @app.get("/register")
 async def register_page(request: Request):
     return templates.TemplateResponse(request, "register.html")
-# #?test
-# @app.get("/")
-# async def home(request : Request):
-#     return templates.TemplateResponse(request=request, name="index.html")
+
+@app.get("/")
+async def login_page(request: Request):
+    return templates.TemplateResponse(request, "login.html")
+
+@app.get("/chat")
+async def chat_page(request: Request):
+    return templates.TemplateResponse(request, "chat.html")

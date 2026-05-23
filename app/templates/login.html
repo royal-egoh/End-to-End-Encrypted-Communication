@@ -136,31 +136,27 @@ button:hover {
     </div>
   </div>
 
-   <script type="py">
-    from pyscript import document, window
-    from pyodide.http import pyfetch
-    import asyncio
-    import json
-    
-    async def login():
-        username_input = document.getElementById("username").value
-        password_input = document.getElementById("password").value
+   <script>
+document.getElementById("login-form").addEventListener("submit", async function(event) {
+    event.preventDefault();
 
-        response = await pyfetch("/auth/login", method="POST", body=f"username={username_input}&password={password_input}", headers={"Content-Type": "application/x-www-form-urlencoded"})
-        if response.ok:
-            data = await response.json()
-            token = data.get("access_token")
-            window.localStorage.setItem("token", token)
-            window.location.href = "/chat"        #?CHECK
-        else:
-            window.alert("Login failed. Please check your credentials.")
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
 
-    async def handle_submit(event):
-        event.preventDefault()
-        await login()
+    const response = await fetch("/auth/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: `username=${username}&password=${password}`
+    });
 
-    document.getElementById("login-form").addEventListener("submit", handle_submit)
-    
-    </script>
+    if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("token", data.access_token);
+        window.location.href = "/chat";
+    } else {
+        alert("Invalid username or password.");
+    }
+});
+</script>
 </body>
 </html>

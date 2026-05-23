@@ -136,52 +136,38 @@ button:hover {
       Already have an account? <a href="/">Login</a>
     </div>
   </div>
-<script type="py">
-from pyscript import document, window
-from pyodide.http import pyfetch
-import asyncio
-import json
-from js import Uint8Array, Array
-import base64
+<script>
+document.getElementById("register-form").addEventListener("submit", async function(event) {
+    event.preventDefault();
 
-def array_buffer_to_base64(buffer):
-    uint8 = Uint8Array.new(buffer)
-    binary = Array.from(uint8).join(",")
-    bytes_list = bytes([int(x) for x in binary.split(",")])
-    return base64.b64encode(bytes_list).decode("utf-8")
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
 
-async def register():
-    username_input = document.getElementById("username").value
-    password_input = document.getElementById("password").value
-
-    key_pair = await window.crypto.subtle.generateKey(
-        {"name": "RSA-OAEP", "modulusLength": 2048, 
-        "publicExponent": Uint8Array([1, 0, 1]), 
-        "hash": "SHA-256"},
-        True,
+    const keyPair = await window.crypto.subtle.generateKey(
+        {name: "RSA-OAEP", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256"},
+        true,
         ["encrypt", "decrypt"]
-    )
-    public_key = await window.crypto.subtle.exportKey("spki", key_pair.publicKey) 
-    private_key = await window.crypto.subtle.exportKey("pkcs8", key_pair.privateKey)
+    );
 
-    public_key_str = array_buffer_to_base64(public_key)
-    private_key_str = array_buffer_to_base64(private_key)
-    response = await pyfetch("/auth/register", method="POST",body=json.dumps({
-        "username": username_input,
-        "password": password_input,
-        "public_key": public_key_str
-    }),headers={"Content-Type": "application/json"})
-    if response.ok:
-        window.localStorage.setItem("private_key", private_key_str)
-        window.location.href = "/"
-    else:
-      window.alert("Registration failed.")
+    const publicKeyBuffer = await window.crypto.subtle.exportKey("spki", keyPair.publicKey);
+    const privateKeyBuffer = await window.crypto.subtle.exportKey("pkcs8", keyPair.privateKey);
 
-async def handle_submit(event):
-    event.preventDefault()
-    await register()
+    const publicKeyStr = btoa(String.fromCharCode(...new Uint8Array(publicKeyBuffer)));
+    const privateKeyStr = btoa(String.fromCharCode(...new Uint8Array(privateKeyBuffer)));
 
-document.getElementById("register-form").addEventListener("submit", handle_submit)
+    const response = await fetch("/auth/register", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({username, password, public_key: publicKeyStr})
+    });
+
+    if (response.ok) {
+        localStorage.setItem("private_key", privateKeyStr);
+        window.location.href = "/chat";
+    } else {
+        alert("Registration failed.");
+    }
+});
 </script>
 </body>
 </html>
