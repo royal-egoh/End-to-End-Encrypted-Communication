@@ -20,9 +20,9 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(messages.router)
 
-@app.get("/ws-test")
-async def ws_test():
-    return {"status": "websocket router working"}
+# @app.get("/ws-test")
+# async def ws_test():
+#     return {"status": "websocket router working"}
 
 #?Websocket endpoint, issue with apirouter
 @app.websocket("/ws")
@@ -55,7 +55,7 @@ async def websocket_endpoint(websocket: WebSocket, db: Session = Depends(get_db)
 async def register_page(request: Request):
     return templates.TemplateResponse(request, "register.html")
 
-@app.get("/")
+@app.get("/login")
 async def login_page(request: Request):
     return templates.TemplateResponse(request, "login.html")
 
