@@ -10,9 +10,12 @@ from app.services import verify_token, save_message
 from app.schemas import MessageCreate, MessageResponse
 from app.models import User
 import json
+from fastapi.staticfiles import StaticFiles
+
 
 app = FastAPI()
 Base.metadata.create_all(bind=engine)
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 templates = Jinja2Templates(directory="app/templates")
 
@@ -20,11 +23,9 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(messages.router)
 
-# @app.get("/ws-test")
-# async def ws_test():
-#     return {"status": "websocket router working"}
+# ?Websocket endpoint, issue with apirouter
 
-#?Websocket endpoint, issue with apirouter
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, db: Session = Depends(get_db)):
     token = websocket.query_params.get("token")
@@ -43,21 +44,28 @@ async def websocket_endpoint(websocket: WebSocket, db: Session = Depends(get_db)
         while True:
             text = await websocket.receive_text()
             data = json.loads(text)
+
+            # heartbeat ping
+            if data.get("type") == "ping":
+                continue
+
             message_create = MessageCreate.model_validate(data)
             message = save_message(message_create, current_user=user, db=db)
             message_response = MessageResponse.model_validate(message)
             await manager.send_to_user(message_create.recipient_id, message_response.model_dump_json())
     except WebSocketDisconnect:
         manager.disconnect(user.id)
-        
+
 
 @app.get("/register")
 async def register_page(request: Request):
     return templates.TemplateResponse(request, "register.html")
 
+
 @app.get("/login")
 async def login_page(request: Request):
     return templates.TemplateResponse(request, "login.html")
+
 
 @app.get("/chat")
 async def chat_page(request: Request):

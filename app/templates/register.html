@@ -133,7 +133,7 @@ button:hover {
     </form>
 
     <div class="footer">
-      Already have an account? <a href="/">Login</a>
+      Already have an account? <a href="/login">Login</a>
     </div>
   </div>
 <script>
@@ -162,8 +162,9 @@ document.getElementById("register-form").addEventListener("submit", async functi
     });
 
     if (response.ok) {
-        localStorage.setItem("private_key", privateKeyStr);
+        localStorage.setItem(`private_key_${username}`, privateKeyStr);
         window.location.href = "/chat";
+        
     } else {
         alert("Registration failed.");
     }

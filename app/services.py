@@ -51,7 +51,7 @@ def create_user(user: UserCreate, db: Session):
     return UserResponse.model_validate(new_user)
 
 def save_message(message: MessageCreate, current_user: User, db: Session):
-    new_message = Message(content=message.content, recipient_id=message.recipient_id, sender_id=current_user.id)
+    new_message = Message(content_for_sender=message.content_for_sender, content_for_receiver=message.content_for_receiver, recipient_id=message.recipient_id, sender_id=current_user.id)
     db.add(new_message)
     db.commit()
     db.refresh(new_message)

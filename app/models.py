@@ -15,7 +15,11 @@ class User(Base):
 class Message(Base):
     __tablename__ = 'messages'
     id = Column(Integer, primary_key=True, index=True)
-    content = Column(String)
+    # content = Column(String)
+    
+    content_for_sender = Column(String)
+    content_for_receiver = Column(String)
+    
     sender_id = Column(Integer, ForeignKey("users.id"))
     recipient_id = Column(Integer, ForeignKey("users.id"))
     timestamp = Column(DateTime, server_default=func.now())
