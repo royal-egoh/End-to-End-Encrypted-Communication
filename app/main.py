@@ -70,3 +70,7 @@ async def login_page(request: Request):
 @app.get("/chat")
 async def chat_page(request: Request):
     return templates.TemplateResponse(request, "chat.html")
+
+@app.get("/")
+async def home(request: Request):
+    return templates.TemplateResponse(request, "home.html")

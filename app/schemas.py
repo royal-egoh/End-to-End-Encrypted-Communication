@@ -16,7 +16,7 @@ class UserResponse(BaseModel):
 class MessageCreate(BaseModel):
     recipient_id: int = Field(...)
     content_for_sender: str = Field(...)
-    content_for_receiver: str = Field(...)
+    content_for_recipient: str = Field(...)
     
     
 class MessageResponse(BaseModel):
@@ -24,7 +24,7 @@ class MessageResponse(BaseModel):
     recipient_id: int
     timestamp:datetime
     content_for_sender: str 
-    content_for_receiver: str
+    content_for_recipient: str
     
     model_config  = ConfigDict(from_attributes=True)
 

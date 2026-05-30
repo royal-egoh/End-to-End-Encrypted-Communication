@@ -18,7 +18,7 @@ class Message(Base):
     # content = Column(String)
     
     content_for_sender = Column(String)
-    content_for_receiver = Column(String)
+    content_for_recipient = Column(String)
     
     sender_id = Column(Integer, ForeignKey("users.id"))
     recipient_id = Column(Integer, ForeignKey("users.id"))

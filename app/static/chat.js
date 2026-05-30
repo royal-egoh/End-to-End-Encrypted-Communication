@@ -10,6 +10,12 @@ let myId = null;
 let currentRecipient = null;
 let ws = null;
 
+setTimeout(() => {
+    if (!ws) {
+        init();
+    }
+}, 3000);
+
 //?global var for ping interval
 let pingInterval = null;
 document.getElementById("logged-user").textContent = myUsername;
@@ -24,14 +30,13 @@ async function init() {
 
     await loadConversations();
 
+
+
     ws = new WebSocket(`ws://127.0.0.1:8000/ws?token=${token}`);
     ws.onopen = () => console.log("WebSocket connected");
     ws.onerror = (e) => console.log("WebSocket error", e);
     ws.onclose = function() {
         console.log("WebSocket closed, reconnecting...");
-        setTimeout(() => {
-            init();
-        }, 3000);
     };
 
     if (pingInterval) {
@@ -52,7 +57,7 @@ async function init() {
             appendMessage(decrypted, false);
         }
     };
-    // ── Search to start new conversation ──
+    //search input
     
 }
 
@@ -76,42 +81,70 @@ document.getElementById("search-input").addEventListener("keydown", async functi
             }
         }
     });
+//date separator
+function addDateSeparator(container, timestamp) {
+    const date = new Date(timestamp);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    let label;
+    if (date.toDateString() === today.toDateString()) label = "Today";
+    else if (date.toDateString() === yesterday.toDateString()) label = "Yesterday";
+    else label = date.toLocaleDateString([], {day: "numeric", month: "long", year: "numeric"});
+
+    const sep = document.createElement("div");
+    sep.className = "date-separator";
+    sep.innerHTML = `<span>${label}</span>`;
+    container.appendChild(sep);
+}
 
 //conversations
     async function loadConversations() {
-        const response = await fetch(`/users/${myUsername}/conversations`, {
-            headers: {"Authorization": `Bearer ${token}`}
-        });
-        const conversations = await response.json();
-        
-        const userList = document.getElementById("user-list");
-        userList.innerHTML = "";
-        //! const last_message = user.last_message; Last message preview
+    const response = await fetch(`/users/${myUsername}/conversations`, {
+        headers: { "Authorization": `Bearer ${token}` }
+    });
 
-        
-        conversations.forEach(user => {
-            if (user.username === myUsername){
-                return
+    const conversations = await response.json();
+
+    const userList = document.getElementById("user-list");
+    userList.innerHTML = "";
+
+    for (const user of conversations) {
+        if (user.username === myUsername) continue;
+
+        let preview = "Click to chat";
+
+        if (user.last_message) {
+            try {
+                const decrypted = await decryptMessage(user.last_message);
+                preview = decrypted.slice(0, 15);
+            } catch (e) {
+                preview = "[encrypted]";
             }
-            const div = document.createElement("div");
-            div.className = "user";
-            //?side profile
-            div.innerHTML = `
-                <div class="avatar">${user.username[0].toUpperCase()}</div>
-                <div class="user-info">
-                    <div class="username">${user.username}</div>
-                    <div class="preview">Click to chat</div>
-                </div>
-            `;
-            div.onclick = () => openChat(user);
-            userList.appendChild(div);
-        });
-    }
+        }
 
-    // ── Open a conversation ───────────────────────
+        const div = document.createElement("div");
+        div.className = "user";
+
+        div.innerHTML = `
+            <div class="header-avatar">${user.username[0].toUpperCase()}</div>
+            <div class="user-info">
+                <div class="username">${user.username}</div>
+                <div class="preview">${preview}...</div>
+            </div>
+        `;
+
+        div.onclick = () => openChat(user);
+        userList.appendChild(div);
+    }
+}
+
+    // open a chat
     async function openChat(user) {
         currentRecipient = user;
         document.getElementById("chat-username").textContent = user.username;
+        document.getElementById("header-avatar").textContent = user.username[0].toUpperCase();
 
         const response = await fetch(`/messages/history/${user.username}`, {
             headers: {"Authorization": `Bearer ${token}`}
@@ -120,12 +153,18 @@ document.getElementById("search-input").addEventListener("keydown", async functi
         displayMessages(messages);
     }
 
-    // ── Render full message history ───────────────
+    //message history
     async function displayMessages(messages) {
         const container = document.getElementById("messages");
         container.innerHTML = "";
+        let lastDate = null;
 
         for (const msg of messages) {
+            const msgDate = new Date(msg.timestamp).toDateString();
+            if (msgDate !== lastDate) {
+                addDateSeparator(container, msg.timestamp);
+                lastDate = msgDate;
+            }
             const div = document.createElement("div");
             const isSent = msg.sender_id === myId;
             div.className = `msg ${isSent ? "sent" : "received"}`;
@@ -133,7 +172,7 @@ document.getElementById("search-input").addEventListener("keydown", async functi
                 hour: "2-digit", minute: "2-digit"
             });
 
-            let content = msg.content;
+            let content = "";
             try {
                 const encryptedContent = isSent ? msg.content_for_sender : msg.content_for_recipient;
                 content = await decryptMessage(encryptedContent);
@@ -147,7 +186,7 @@ document.getElementById("search-input").addEventListener("keydown", async functi
         container.scrollTop = container.scrollHeight;
     }
 
-    // ── Append a single message bubble ───────────
+    //message appending
     function appendMessage(content, isSent) {
         const container = document.getElementById("messages");
         const div = document.createElement("div");
@@ -168,7 +207,7 @@ document.getElementById("search-input").addEventListener("keydown", async functi
         const recipientData = await recipientResponse.json();
         const contentForRecipient = await encryptWithKey(text, recipientData.public_key);
 
-        // encrypt for sender (yourself)
+        // encrypt for senderr
         const senderResponse = await fetch(`/users/${myUsername}/public_key`, {
             headers: {"Authorization": `Bearer ${token}`}
         });
@@ -188,9 +227,13 @@ document.getElementById("search-input").addEventListener("keydown", async functi
         return btoa(String.fromCharCode(...new Uint8Array(encrypted)));
 }
 
-    // ── Decrypt with my private key ───────────────
+    // decropt message with my private key
     async function decryptMessage(encryptedContent) {
         const privateKeyStr = localStorage.getItem(`private_key_${myUsername}`);
+        if (!privateKeyStr){
+            throw new Error("Private Key Not Found")
+            
+        }
         const privateKeyBytes = Uint8Array.from(atob(privateKeyStr),c => c.charCodeAt(0));
 
         const privateKeyBuffer = privateKeyBytes.buffer;
@@ -207,14 +250,41 @@ document.getElementById("search-input").addEventListener("keydown", async functi
         return new TextDecoder().decode(decrypted);
     }
 
-    // ── Send message on form submit ───────────────
+    //on submitt
     document.getElementById("message-form").addEventListener("submit", async function(event) {
         event.preventDefault();
         const input = document.getElementById("message-input");
         const text = input.value.trim();
         if (!text || !currentRecipient) return;
 
+        const encoded = new TextEncoder().encode(text);
+
+        if (encoded.length > 190) {
+            alert("Message is too long. Maximum is about 190 bytes.");
+            return;
+        }
+
         const {contentForRecipient, contentForSender} = await encryptMessage(text, currentRecipient.username);
+        
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            console.log("Reconnecting websocket...");
+
+            ws = new WebSocket(`ws://127.0.0.1:8000/ws?token=${token}`);
+
+            ws.onopen = () => {
+                console.log("Reconnected.");
+        
+            ws.send(JSON.stringify({
+                recipient_id: currentRecipient.id,
+                content_for_recipient: contentForRecipient,
+                content_for_sender: contentForSender
+            }));
+    };
+
+    return;
+}
+
+
         ws.send(JSON.stringify({
         recipient_id: currentRecipient.id,
         content_for_recipient: contentForRecipient,

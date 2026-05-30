@@ -5,283 +5,358 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cipher</title>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      
-      html,
-      body {
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      html, body {
         height: 100%;
         overflow: hidden;
-        font-family:
-          system-ui,
-          -apple-system,
-          "Segoe UI",
-          Inter,
-          sans-serif;
+        font-family: system-ui, -apple-system, "Segoe UI", Inter, sans-serif;
         background: #000;
         color: #fff;
       }
-      .app {
-        display: flex;
-        height: 100vh;
-        width: 100vw;
-      }
 
-      /* Sidebar */
+      .app { display: flex; height: 100vh; width: 100vw; }
+
+      /* ── Sidebar ── */
       .sidebar {
-        width: 300px;
-        background: #111;
+        width: 320px;
+        background: #0f0f0f;
         display: flex;
         flex-direction: column;
-        border-right: 1px solid #1f1f1f;
-      }
-      .sidebar-header {
-        padding: 20px 16px;
-        border-bottom: 1px solid #1f1f1f;
-      }
-      .sidebar-header h1 {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #fff;
-        letter-spacing: 0.5px;
-      }
-      .search-wrap {
-        padding: 12px;
-        border-bottom: 1px solid #1f1f1f;
-      }
-      .search-wrap input {
-        width: 100%;
-        padding: 10px 14px;
-        background: #1c1c1c;
-        border: 1px solid #262626;
-        border-radius: 8px;
-        color: #fff;
-        font-size: 0.9rem;
-        outline: none;
-      }
-      .search-wrap input::placeholder {
-        color: #666;
-      }
-      .search-wrap input:focus {
-        border-color: #3a3a3a;
+        border-right: 1px solid #1a1a1a;
+        flex-shrink: 0;
       }
 
-      .user-list {
-        flex: 1;
-        overflow-y: auto;
+      .sidebar-header {
+        padding: 18px 16px 14px;
+        border-bottom: 1px solid #1a1a1a;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #0f0f0f;
       }
+
+      .sidebar-header h1 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: 1px;
+      }
+
+      .sidebar-header a {
+        font-size: 0.78rem;
+        color: #555;
+        text-decoration: none;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        transition: color 0.2s;
+      }
+
+      .sidebar-header a:hover { color: #888; }
+
+      .search-wrap {
+        padding: 10px 12px;
+        border-bottom: 1px solid #1a1a1a;
+        background: #0f0f0f;
+      }
+
+      .search-wrap input {
+        width: 100%;
+        padding: 9px 14px;
+        background: #181818;
+        border: 1px solid #222;
+        border-radius: 20px;
+        color: #fff;
+        font-size: 0.875rem;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+
+      .search-wrap input::placeholder { color: #444; }
+      .search-wrap input:focus { border-color: #333; background: #1c1c1c; }
+
+      .user-list { flex: 1; overflow-y: auto; }
+
       .user {
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 12px 14px;
+        gap: 11px;
+        padding: 11px 14px;
         cursor: pointer;
-        border-bottom: 1px solid #181818;
+        border-bottom: 1px solid #151515;
+        transition: background 0.15s;
+        position: relative;
       }
-      .user:hover {
-        background: #161616;
-      }
-      .user.active {
-        background: #1d1d1d;
-      }
-      .avatar {
-        width: 42px;
-        height: 42px;
-        border-radius: 50%;
+
+      .user:hover { background: #141414; }
+      .user.active { background: #1a1a1a; }
+
+      .user.active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
         background: #fff;
-        color: #000;
+        border-radius: 0 2px 2px 0;
+      }
+
+      .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #222;
+        color: #fff;
+        border: 1px solid #2a2a2a;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: 700;
-        font-size: 1rem;
+        font-weight: 600;
+        font-size: 0.9rem;
         flex-shrink: 0;
+        letter-spacing: 0.5px;
       }
-      .user-info {
-        min-width: 0;
-        flex: 1;
-      }
+
+      .user-info { min-width: 0; flex: 1; }
+
       .username {
-        color: #fff;
-        font-size: 0.95rem;
+        color: #f0f0f0;
+        font-size: 0.9rem;
         font-weight: 600;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
+
       .preview {
-        color: #888;
-        font-size: 0.82rem;
+        color: #555;
+        font-size: 0.78rem;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         margin-top: 2px;
       }
 
-      /* Main */
+      /* ── Main panel ── */
       .main {
         flex: 1;
         display: flex;
         flex-direction: column;
-        background: #0a0a0a;
+        background: #080808;
         min-width: 0;
       }
+
       .main-header {
-        padding: 16px 20px;
-        border-bottom: 1px solid #1f1f1f;
+        padding: 13px 20px;
+        border-bottom: 1px solid #1a1a1a;
         display: flex;
         align-items: center;
-        gap: 12px;
-        background: #101010;
-      }
-      .main-header .avatar {
-        width: 36px;
-        height: 36px;
-        font-size: 0.9rem;
-      }
-      .main-header h2 {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #fff;
+        gap: 11px;
+        background: #0f0f0f;
+        flex-shrink: 0;
       }
 
+      .main-header .avatar { width: 34px; height: 34px; font-size: 0.82rem; }
+
+      .main-header-info { display: flex; flex-direction: column; }
+
+      .main-header h2 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #f0f0f0;
+        line-height: 1.2;
+      }
+
+      .main-header .status {
+        font-size: 0.72rem;
+        color: #444;
+        margin-top: 1px;
+      }
+
+      /* ── Messages area ── */
       .messages {
         flex: 1;
         overflow-y: auto;
-        padding: 20px;
+        padding: 16px 20px;
         display: flex;
         flex-direction: column;
+        gap: 3px;
+      }
+
+      /* Date separator */
+      .date-separator {
+        display: flex;
+        align-items: center;
         gap: 10px;
+        margin: 14px 0 10px;
+        align-self: center;
       }
-      .msg {
-        max-width: 65%;
-        padding: 9px 13px;
+
+      .date-separator span {
+        font-size: 0.72rem;
+        color: #3a3a3a;
+        background: #111;
+        padding: 4px 12px;
         border-radius: 10px;
-        color: #fff;
-        font-size: 0.92rem;
-        line-height: 1.35;
-        word-wrap: break-word;
+        border: 1px solid #1e1e1e;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
       }
+
+      /* Message bubbles */
+      .msg {
+        max-width: 62%;
+        padding: 8px 12px 6px;
+        border-radius: 12px;
+        color: #e8e8e8;
+        font-size: 0.88rem;
+        line-height: 1.45;
+        word-wrap: break-word;
+        position: relative;
+      }
+
       .msg.sent {
         align-self: flex-end;
-        background: #1e1e1e;
+        background: #1c1c1c;
         border-bottom-right-radius: 3px;
+        margin-left: auto;
       }
+
       .msg.received {
         align-self: flex-start;
-        background: #2a2a2a;
+        background: #242424;
         border-bottom-left-radius: 3px;
       }
+
       .msg .time {
         display: block;
-        font-size: 0.7rem;
-        color: #777;
-        margin-top: 4px;
+        font-size: 0.67rem;
+        color: #404040;
+        margin-top: 3px;
         text-align: right;
       }
 
+      .msg.sent .time { color: #383838; }
+
+      /* Consecutive message spacing */
+      .msg + .msg.sent { margin-top: 2px; }
+      .msg + .msg.received { margin-top: 2px; }
+      .msg.sent + .msg.received,
+      .msg.received + .msg.sent { margin-top: 8px; }
+
+      /* ── Input bar ── */
       .input-bar {
-        padding: 14px 16px;
-        border-top: 1px solid #1f1f1f;
+        padding: 12px 16px;
+        border-top: 1px solid #1a1a1a;
         display: flex;
         gap: 10px;
-        background: #101010;
+        align-items: center;
+        background: #0f0f0f;
+        flex-shrink: 0;
       }
+
       .input-bar input {
         flex: 1;
-        padding: 11px 16px;
-        background: #1c1c1c;
-        border: 1px solid #262626;
+        padding: 10px 16px;
+        background: #181818;
+        border: 1px solid #222;
         border-radius: 22px;
         color: #fff;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         outline: none;
+        transition: border-color 0.2s;
       }
-      .input-bar input::placeholder {
-        color: #666;
-      }
-      .input-bar input:focus {
-        border-color: #3a3a3a;
-      }
+
+      .input-bar input::placeholder { color: #444; }
+      .input-bar input:focus { border-color: #333; background: #1c1c1c; }
+
       .send-btn {
-        padding: 0 22px;
+        width: 38px;
+        height: 38px;
         background: #fff;
         color: #000;
         border: none;
-        border-radius: 22px;
+        border-radius: 50%;
         font-weight: 700;
         cursor: pointer;
-        font-size: 0.9rem;
+        font-size: 0.82rem;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s, transform 0.1s;
       }
-      .send-btn:hover {
-        background: #e5e5e5;
+
+      .send-btn:hover { background: #e8e8e8; }
+      .send-btn:active { transform: scale(0.93); }
+
+      /* Empty state */
+      .empty-state {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #2a2a2a;
+        gap: 8px;
       }
+
+      .empty-state p { font-size: 0.85rem; }
 
       /* Scrollbars */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #222;
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #2e2e2e;
-      }
+      ::-webkit-scrollbar { width: 4px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #1e1e1e; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #282828; }
 
       @media (max-width: 640px) {
-        .sidebar {
-          width: 90px;
-        }
+        .sidebar { width: 72px; }
         .sidebar-header h1,
+        .sidebar-header a,
         .search-wrap,
-        .user-info {
-          display: none;
-        }
-        .user {
-          justify-content: center;
-        }
+        .user-info { display: none; }
+        .user { justify-content: center; padding: 12px 0; }
+        .user.active::before { display: none; }
       }
     </style>
   </head>
   <body>
     <div class="app">
       <aside class="sidebar">
-        <div class="sidebar-header"><h1>Cipher</h1><strong><a style="text-decoration: none; color: #ffffff;, font-size: 30px;" href="/" id="logged-user"></a></strong></div>
+        <div class="sidebar-header">
+          <h1>Cipher</h1>
+          <a href="/" id="logged-user"></a>
+        </div>
         <div class="search-wrap">
-          <input type="text" id="search-input" placeholder="Search users..." />
+          <input type="text" id="search-input" placeholder="Search or start new chat" />
         </div>
-
-        <div class="user-list" id="user-list">
-          <div class="user active">
-            <div class="avatar"></div>
-            <div class="user-info">
-              <div class="username"></div>
-              <div class="preview" id="last-message"></div>
-            </div>
-          </div>
-        </div>
+        <div class="user-list" id="user-list"></div>
       </aside>
 
       <main class="main">
         <div class="main-header" id="main-header">
-          <div class="avatar"></div>
-          <h2 id="chat-username"></h2>
+          <div class="avatar" id="header-avatar"></div>
+          <div class="main-header-info">
+            <h2 id="chat-username"></h2>
+            <span class="status" id="chat-status">end-to-end encrypted</span>
+          </div>
         </div>
 
         <div class="messages" id="messages">
-          
+          <div class="empty-state">
+            <p>Select a conversation or search for a user</p>
+          </div>
         </div>
 
         <form class="input-bar" id="message-form" onsubmit="return false;">
-          <input type="text" placeholder="Type a message" id="message-input" />
-          <button class="send-btn" type="submit">Send</button>
+          <input type="text" placeholder="Message" id="message-input" autocomplete="off" />
+          <button class="send-btn" type="submit" aria-label="Send">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
         </form>
       </main>
     </div>
