@@ -5,11 +5,14 @@ class UserCreate(BaseModel):
     username: str = Field(..., max_length=20)
     password: str = Field(..., min_length=6)
     public_key: str = Field(...)
+    encrypted_private_key: str = Field(...)
+
     
 class UserResponse(BaseModel):
     id: int
     username: str
     public_key: str
+    
     
     model_config  = ConfigDict(from_attributes=True)
     

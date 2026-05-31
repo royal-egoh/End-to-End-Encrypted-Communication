@@ -8,6 +8,7 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     password = Column(String)
     public_key = Column(String, index=True)
+    encrypted_private_key = Column(String)
     
     sent_messages = relationship("Message", foreign_keys="Message.sender_id", back_populates="sender")
     received_messages = relationship("Message", foreign_keys="Message.recipient_id", back_populates="recipient")

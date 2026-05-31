@@ -44,7 +44,7 @@ def create_user(user: UserCreate, db: Session):
     existing_user = db.query(User).filter(User.username == user.username).first()
     if existing_user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already registered")
-    new_user = User(username=user.username, password=hash_password(user.password), public_key=user.public_key)
+    new_user = User(username=user.username, password=hash_password(user.password), public_key=user.public_key, encrypted_private_key=user.encrypted_private_key)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)

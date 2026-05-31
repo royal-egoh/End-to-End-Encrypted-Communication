@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
 <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <title>Cipher Login</title>
 
 <style>
@@ -17,118 +20,334 @@
   --border: #2a2a2a;
 }
 
-* {
+*, *::before, *::after {
   box-sizing: border-box;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  margin: 0;
+  font-family: 'DM Sans', system-ui, sans-serif;
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--bg);
   color: var(--text);
+  overflow: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 70% at 50% 50%, transparent 40%, #0a0a0a 100%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .card {
+  position: relative;
+  z-index: 1;
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
+  margin: 0 16px;
   background: var(--card);
-  padding: 48px 36px;
+  border: 1px solid #1e1e1e;
+  border-radius: 16px;
+  padding: 40px 36px 36px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04) inset,
+    0 32px 80px rgba(0,0,0,0.8),
+    0 8px 24px rgba(0,0,0,0.4);
+  animation: cardIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.lock-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.lock-icon {
+  width: 48px;
+  height: 48px;
   border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.lock-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: #ffffff;
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .title {
-  text-align: center;
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   color: var(--text);
-  letter-spacing: 0.02em;
+  text-align: center;
 }
 
 .subtitle {
-  text-align: center;
-  margin-top: 8px;
-  font-size: 0.9rem;
+  margin-top: 5px;
+  font-size: 0.8rem;
   color: var(--muted);
+  text-align: center;
+  letter-spacing: 0.01em;
+  font-family: 'DM Mono', monospace;
 }
 
 .separator {
   height: 1px;
-  background: #2a2a2a;
+  background: linear-gradient(90deg, transparent, #2a2a2a 20%, #2a2a2a 80%, transparent);
   margin: 24px 0;
 }
 
 .form-group {
-  margin-bottom: 18px;
+  margin-bottom: 14px;
+  position: relative;
 }
 
-input {
+/* Static label — fades out when field is active/filled */
+.form-group label {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.875rem;
+  color: var(--muted);
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  opacity: 1;
+}
+
+.form-group input:focus + label,
+.form-group input:not(:placeholder-shown) + label {
+  opacity: 0;
+}
+
+input[type="text"],
+input[type="password"] {
   width: 100%;
-  padding: 14px 12px;
-  border-radius: 8px;
+  padding: 14px 42px 14px 14px;
+  border-radius: 10px;
   border: 1px solid var(--border);
   background: var(--input);
   color: var(--text);
+  font-size: 0.9rem;
+  font-family: 'DM Sans', sans-serif;
   outline: none;
-  transition: 0.2s ease;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  caret-color: #fff;
 }
 
-input:focus {
-  border-color: #ffffff;
+input[type="text"]::placeholder,
+input[type="password"]::placeholder {
+  color: transparent;
 }
 
-button {
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border-color: rgba(255,255,255,0.3);
+  background: #1f1f1f;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.04);
+}
+
+/* --- Show/hide toggle button --- */
+.toggle-vis {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #4a4a4a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
+  z-index: 2;
+  width: auto;
+  margin: 0;
+  border-radius: 4px;
+}
+
+.toggle-vis:hover {
+  color: #9a9a9a;
+  background: none;
+  box-shadow: none;
+}
+
+.toggle-vis:active {
+  transform: translateY(-50%) scale(0.92);
+}
+
+.toggle-vis svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: block;
+}
+
+.toggle-vis .slash {
+  display: none;
+}
+
+.toggle-vis.visible .slash {
+  display: block;
+}
+
+.toggle-vis.visible .eye-parts {
+  opacity: 0.5;
+}
+
+/* Submit button */
+button[type="submit"] {
   width: 100%;
-  padding: 14px;
-  margin-top: 6px;
-  border-radius: 8px;
+  padding: 13px;
+  margin-top: 8px;
+  border-radius: 10px;
   border: none;
   background: #ffffff;
   color: #000000;
+  font-size: 0.9rem;
   font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: background 0.18s ease, transform 0.1s ease, box-shadow 0.18s ease;
+  letter-spacing: 0.01em;
+  position: relative;
+  overflow: hidden;
 }
 
-button:hover {
-  background: #e6e6e6;
+button[type="submit"]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+button[type="submit"]:hover {
+  background: #f0f0f0;
+  box-shadow: 0 4px 16px rgba(255,255,255,0.12);
+}
+
+button[type="submit"]:active {
+  transform: scale(0.98);
 }
 
 .footer {
-  margin-top: 16px;
+  margin-top: 20px;
   text-align: center;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--muted);
+  border-top: 1px solid #1a1a1a;
+  padding-top: 18px;
 }
 
 .footer a {
-  color: #ffffff;
-  text-decoration: underline;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding-bottom: 1px;
+  transition: border-color 0.15s ease;
+}
+
+.footer a:hover {
+  border-color: rgba(255,255,255,0.6);
 }
 </style>
 </head>
 
 <body>
   <div class="card">
-    <div class="title">Cipher</div>
-    <div class="subtitle">End-to-end encrypted messaging</div>
+    <div class="lock-wrap">
+      <div class="lock-icon">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+      <div class="title">Cipher</div>
+      <div class="subtitle">end-to-end encrypted messaging</div>
+    </div>
 
     <div class="separator"></div>
 
     <form id="login-form">
       <div class="form-group">
-        <input type="text" placeholder="Username" name="username" id="username" required />
+        <input type="text" placeholder="Username" name="username" id="username" required autocomplete="username" />
+        <label for="username">Username</label>
       </div>
 
       <div class="form-group">
-        <input type="password" placeholder="Password" name="password" id="password" required />
+        <input type="password" placeholder="Password" name="password" id="password" required autocomplete="current-password" />
+        <label for="password">Password</label>
+        <button type="button" class="toggle-vis" aria-label="Show password" data-target="password">
+          <svg viewBox="0 0 24 24">
+            <g class="eye-parts">
+              <path d="M1 12s4-8 11-8 11 8 11 8"/>
+              <path d="M1 12s4 8 11 8 11-8 11-8"/>
+              <circle cx="12" cy="12" r="3"/>
+            </g>
+            <line class="slash" x1="3" y1="3" x2="21" y2="21"/>
+          </svg>
+        </button>
       </div>
 
-      <button type="submit">Login</button>
+      <div class="form-group">
+        <input type="password" id="pin" placeholder="PIN" required autocomplete="off" inputmode="numeric" maxlength="8" minlength="6"/>
+        <label for="pin">PIN</label>
+        <button type="button" class="toggle-vis" aria-label="Show PIN" data-target="pin">
+          <svg viewBox="0 0 24 24">
+            <g class="eye-parts">
+              <path d="M1 12s4-8 11-8 11 8 11 8"/>
+              <path d="M1 12s4 8 11 8 11-8 11-8"/>
+              <circle cx="12" cy="12" r="3"/>
+            </g>
+            <line class="slash" x1="3" y1="3" x2="21" y2="21"/>
+          </svg>
+        </button>
+      </div>
+
+      <button type="submit">Sign In</button>
     </form>
 
     <div class="footer">
@@ -136,7 +355,20 @@ button:hover {
     </div>
   </div>
 
-   <script>
+<script>
+/* Show/hide toggles */
+document.querySelectorAll(".toggle-vis").forEach(btn => {
+  btn.addEventListener("click", function() {
+    const input = document.getElementById(this.dataset.target);
+    const isHidden = input.type === "password";
+    input.type = isHidden ? "text" : "password";
+    this.classList.toggle("visible", isHidden);
+    this.setAttribute("aria-label", isHidden ? "Hide " + this.dataset.target : "Show " + this.dataset.target);
+  });
+});
+</script>
+
+<script>
 document.getElementById("login-form").addEventListener("submit", async function(event) {
     event.preventDefault();
 
