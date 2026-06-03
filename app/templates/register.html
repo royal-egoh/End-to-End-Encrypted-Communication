@@ -427,10 +427,12 @@ document.getElementById("register-form").addEventListener("submit", async functi
     const publicKeyStr = btoa(String.fromCharCode(...new Uint8Array(publicKeyBuffer)));
     const privateKeyStr = btoa(String.fromCharCode(...new Uint8Array(privateKeyBuffer)));
 
+    const encrypted_private_key = await encryptPrivateKey(privateKeyStr, pin);
+
     const response = await fetch("/auth/register", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({username, password, public_key: publicKeyStr})
+        body: JSON.stringify({username, password, public_key: publicKeyStr, encrypted_private_key, pin})
     });
 
     if (response.ok) {
@@ -467,7 +469,7 @@ async function encryptPrivateKey(privateKeyStr, pin) {
         new TextEncoder().encode(privateKeyStr)
     );
 
-    const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
+    const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength); 
     combined.set(salt, 0);
     combined.set(iv, 16);
     combined.set(new Uint8Array(encrypted), 28);

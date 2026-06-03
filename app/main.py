@@ -39,6 +39,7 @@ async def websocket_endpoint(websocket: WebSocket, db: Session = Depends(get_db)
         await websocket.close(code=1008)
         return
     await websocket.accept()
+    #! conn = await websocket.accept()
     manager.connect(user.id, websocket)
     try:
         while True:

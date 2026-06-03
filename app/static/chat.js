@@ -22,11 +22,22 @@ document.getElementById("logged-user").textContent = myUsername;
 
 //main init
 async function init() {
+    try {
     const userResponse = await fetch(`/users/${myUsername}/public_key`, {
         headers: {"Authorization": `Bearer ${token}`}
     });
+    if (!userResponse.ok) {
+        throw new Error("Failed to fetch user data");
+    }
+
     const userData = await userResponse.json();
     myId = userData.id;
+}catch(e) {
+    console.log("Error fetching user data", e);
+    window.location.href = "/login";
+    return;
+}
+    
 
     await loadConversations();
 
@@ -52,7 +63,7 @@ async function init() {
 
     ws.onmessage = async function(event) {
         const msg = JSON.parse(event.data);
-        if (currentRecipient && msg.sender_id === currentRecipient.id) {
+       if (currentRecipient && Number(msg.sender_id) === Number(currentRecipient.id)) {
             const decrypted = await decryptMessage(msg.content_for_recipient);
             appendMessage(decrypted, false);
         }
@@ -178,6 +189,7 @@ function addDateSeparator(container, timestamp) {
                 content = await decryptMessage(encryptedContent);
             } catch(e) {
                 content = "[encrypted]"; //?
+                alert("Session expired. Please log in again.")
             }
 
             div.innerHTML = `${content}<span class="time">${time}</span>`;
@@ -229,7 +241,7 @@ function addDateSeparator(container, timestamp) {
 
     // decropt message with my private key
     async function decryptMessage(encryptedContent) {
-        const privateKeyStr = localStorage.getItem(`private_key_${myUsername}`);
+        const privateKeyStr = sessionStorage.getItem("private_key");
         if (!privateKeyStr){
             throw new Error("Private Key Not Found")
             
