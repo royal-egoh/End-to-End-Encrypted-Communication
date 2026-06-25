@@ -135,6 +135,10 @@ body::after {
 }
 
 /* --- Form group with simple placeholder label --- */
+
+form{
+  position: relative;
+}
 .form-group {
   margin-bottom: 14px;
   position: relative;
@@ -323,6 +327,28 @@ button[type="submit"]:active {
 .footer a:hover {
   border-color: rgba(255,255,255,0.6);
 }
+
+
+#error-msg {
+  position: absolute;
+  bottom: -28px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.75rem;
+  font-family: 'DM Mono', monospace;
+  color: #ff5555;
+  letter-spacing: 0.03em;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+
+#error-msg.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
 </style>
 </head>
 
@@ -378,9 +404,10 @@ button[type="submit"]:active {
         </button>
       </div>
 
-      <!-- Hidden public key (to be filled later via PyScript) -->
+
       <input type="hidden" id="public_key" name="public_key" value="" />
 
+      <p id="error-msg"></p>
       <button type="submit">Create Account</button>
 
       <div class="e2e-badge">
@@ -393,6 +420,7 @@ button[type="submit"]:active {
       Already have an account? <a href="/login">Sign in</a>
     </div>
   </div>
+
 
 <script>
 /* Show/hide toggles */
@@ -434,13 +462,26 @@ document.getElementById("register-form").addEventListener("submit", async functi
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({username, password, public_key: publicKeyStr, encrypted_private_key, pin})
     });
+    function showError(msg) {
+    const el = document.getElementById("error-msg");
+    el.textContent = msg;
+    el.classList.add("visible");
+
+    // auto fade out after 3 seconds
+    setTimeout(() => {
+        el.classList.remove("visible");
+    }, 3000);
+}
 
     if (response.ok) {
         window.location.href = "/chat";
         
     } else {
-        alert("Registration failed.");
+        const error = await response.json();
+        showError(error.detail)
+        return;
     }
+    
 });
 
 // encrypt private key with pin

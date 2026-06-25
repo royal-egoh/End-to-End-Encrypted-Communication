@@ -36,6 +36,7 @@ pyscript==0.3.3
 python-dotenv==1.2.2
 python-jose==3.5.0
 python-multipart==0.0.29
+redis==8.0.1
 requests==2.31.0
 rich==13.7.1
 rsa==4.9.1

@@ -20,6 +20,17 @@ setTimeout(() => {
 let pingInterval = null;
 document.getElementById("logged-user").textContent = myUsername;
 
+function showError(msg) {
+    const el = document.getElementById("error-msg");
+    el.textContent = msg;
+    el.classList.add("visible");
+
+    // auto fade out after 3 seconds
+    setTimeout(() => {
+        el.classList.remove("visible");
+    }, 3000);
+}
+
 //main init
 async function init() {
     try {
@@ -27,7 +38,9 @@ async function init() {
         headers: {"Authorization": `Bearer ${token}`}
     });
     if (!userResponse.ok) {
-        throw new Error("Failed to fetch user data");
+        const error = await response.json();
+        showError(error.detail);
+        return;
     }
 
     const userData = await userResponse.json();
@@ -77,7 +90,8 @@ document.getElementById("search-input").addEventListener("keydown", async functi
             const username = this.value.trim();
             if (!username) return;
             if (username === myUsername) {
-                alert("You cannot chat with yourself.");
+                const error = "You cannot chat with yourself.";
+                showError(error);
                 return;
             }
 
@@ -88,7 +102,9 @@ document.getElementById("search-input").addEventListener("keydown", async functi
                 const user = await response.json();
                 openChat(user);
             } else {
-                alert("User not found.");
+                const error = await response.json();
+                showError(error.detail);
+                return;
             }
         }
     });
@@ -137,7 +153,7 @@ function addDateSeparator(container, timestamp) {
 
         const div = document.createElement("div");
         div.className = "user";
-
+        
         div.innerHTML = `
             <div class="header-avatar">${user.username[0].toUpperCase()}</div>
             <div class="user-info">
@@ -189,7 +205,9 @@ function addDateSeparator(container, timestamp) {
                 content = await decryptMessage(encryptedContent);
             } catch(e) {
                 content = "[encrypted]"; //?
-                alert("Session expired. Please log in again.")
+                const error = "Session expired, Please Login";
+                showError(error);
+                return;
             }
 
             div.innerHTML = `${content}<span class="time">${time}</span>`;
@@ -272,7 +290,8 @@ function addDateSeparator(container, timestamp) {
         const encoded = new TextEncoder().encode(text);
 
         if (encoded.length > 190) {
-            alert("Message is too long. Maximum is about 190 bytes.");
+            const error = "Message is too long. Maximum is about 190 bytes.";
+            showError(error);
             return;
         }
 

@@ -26,7 +26,30 @@
         border-right: 1px solid #1a1a1a;
         flex-shrink: 0;
       }
+      #error-msg {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  background: #1a1a1a;
+  border: 1px solid #3a1a1a;
+  color: #ff5555;
+  font-size: 0.75rem;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.03em;
+  padding: 8px 16px;
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 999;
+  white-space: nowrap;
+}
 
+#error-msg.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
       .sidebar-header {
         padding: 18px 16px 14px;
         border-bottom: 1px solid #1a1a1a;
@@ -322,6 +345,7 @@
     </style>
   </head>
   <body>
+
     <div class="app">
       <aside class="sidebar">
         <div class="sidebar-header">
@@ -340,6 +364,7 @@
           <div class="main-header-info">
             <h2 id="chat-username"></h2>
             <span class="status" id="chat-status">end-to-end encrypted</span>
+            
           </div>
         </div>
 
@@ -361,5 +386,6 @@
       </main>
     </div>
     <script src="/static/chat.js"></script>
+    <p id="error-msg" ></p>
   </body>
 </html>

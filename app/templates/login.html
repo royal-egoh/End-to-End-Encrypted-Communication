@@ -132,6 +132,9 @@ body::after {
   margin: 24px 0;
 }
 
+form{
+  position: relative;
+}
 .form-group {
   margin-bottom: 14px;
   position: relative;
@@ -293,6 +296,26 @@ button[type="submit"]:active {
 .footer a:hover {
   border-color: rgba(255,255,255,0.6);
 }
+#error-msg {
+  position: absolute;
+  bottom: -28px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.75rem;
+  font-family: 'DM Mono', monospace;
+  color: #ff5555;
+  letter-spacing: 0.03em;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+
+#error-msg.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
 </style>
 </head>
 
@@ -347,11 +370,14 @@ button[type="submit"]:active {
         </button>
       </div>
 
+      
       <button type="submit">Sign In</button>
+      <p id="error-msg"></p>
     </form>
 
     <div class="footer">
       Don't have an account? <a href="/register">Register</a>
+      
     </div>
   </div>
 
@@ -382,6 +408,16 @@ document.getElementById("login-form").addEventListener("submit", async function(
         body: `username=${username}&password=${password}`
     });
 
+    function showError(msg) {
+    const el = document.getElementById("error-msg");
+    el.textContent = msg;
+    el.classList.add("visible");
+
+    // auto fade out after 3 seconds
+    setTimeout(() => {
+        el.classList.remove("visible");
+    }, 3000);
+}
     if (response.ok) {
         const data = await response.json();
         localStorage.setItem("token", data.access_token);
@@ -391,10 +427,13 @@ document.getElementById("login-form").addEventListener("submit", async function(
             sessionStorage.setItem("private_key", privateKeyStr);
             window.location.href = "/chat";
         } catch (e) {
-            alert("Failed to decrypt private key. Please check your PIN and try again.");
+            const error = "Invalid Credentials";
+            showError(error);
         }
     } else {
-        alert("Invalid username or password.");
+        const error = await response.json();
+        showError(error.detail)
+        return;
     }
 });
 
