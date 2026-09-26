@@ -56,7 +56,7 @@ async function init() {
 
 
 
-    ws = new WebSocket(`ws://127.0.0.1:8000/ws?token=${token}`);
+    ws = new WebSocket(`wss://cipher-5ajs.onrender.com/ws?token=${token}`);
     ws.onopen = () => console.log("WebSocket connected");
     ws.onerror = (e) => console.log("WebSocket error", e);
     ws.onclose = function() {
@@ -300,7 +300,7 @@ function addDateSeparator(container, timestamp) {
         if (!ws || ws.readyState !== WebSocket.OPEN) {
             console.log("Reconnecting websocket...");
 
-            ws = new WebSocket(`ws://127.0.0.1:8000/ws?token=${token}`);
+            ws = new WebSocket(`wss://cipher-5ajs.onrender.com/ws?token=${token}`);
 
             ws.onopen = () => {
                 console.log("Reconnected.");
